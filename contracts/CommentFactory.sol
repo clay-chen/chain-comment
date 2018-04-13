@@ -1,9 +1,9 @@
 pragma solidity ^0.4.19;
 
-import "./Ownable.sol";
+contract CommentFactory {
+    event NewComment(uint commentId, uint8 score, string contect, uint weight);
 
-contract CommentFactory is Ownable {
-    // 分值（1-10） 评论内容
+    // 分值（1-10）评论内容
     struct Comment {
         uint8 score;
         string contect;
@@ -25,9 +25,16 @@ contract CommentFactory is Ownable {
     // 评论与项目关系
     mapping (uint => uint) commentToPragram;
     mapping (uint => uint) programToCount;
+
+    // 记录用户的权重
+    mapping (address => uint) userToWeight;
     
     function _createComment(uint8 _score, string _content) private returns (uint) {
-        uint commentId = comments.push(Comment(_score, _content, 1)) - 1;
+        if (userToWeight[msg.sender] == 0) {
+            userToWeight[msg.sender] = 1;
+        }
+
+        uint commentId = comments.push(Comment(_score, _content, userToWeight[msg.sender])) - 1;
         commentToUser[commentId] = msg.sender;
         userToCount[msg.sender]++;
         return commentId;
@@ -38,7 +45,7 @@ contract CommentFactory is Ownable {
     }
 
     // 创建节目
-    function createProgram(string _name) public onlyOwner {
+    function createProgram(string _name) public {
         _createProgram(_name);
     }
 
@@ -49,7 +56,7 @@ contract CommentFactory is Ownable {
         programToCount[programId]++;
     }
 
-    function getProgramAverageScore(uint programId) public returns (uint) {
+    function getProgramAverageScore(uint programId) public view returns (uint) {
         uint fz = 0;
         uint fm = 0;
         for (uint i = 0; i < comments.length; i++) {

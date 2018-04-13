@@ -1,5 +1,5 @@
-var CommentFactory = artifacts.require("CommentFactory");
+var Migrations = artifacts.require("./Migrations.sol");
 
-module.exports = function (deployer) {
-    deployer.deploy(CommentFactory);
+module.exports = function(deployer) {
+  deployer.deploy(Migrations);
 };
